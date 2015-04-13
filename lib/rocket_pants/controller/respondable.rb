@@ -25,6 +25,10 @@ module RocketPants
       end
     end
 
+    def self.invalid?(object)
+      object.respond_to?(:errors) && object.errors.present?
+    end
+
     def self.paginated?(object)
       !pagination_type(object).nil?
     end
@@ -49,7 +53,7 @@ module RocketPants
         {
           current:  current,
           previous: (current > 1 ? (current - 1) : nil),
-          next:     (current == total ? nil : (current + 1)),
+          next:     (current => total ? nil : (current + 1)),
           per_page: per_page,
           pages:    total,
           count:    collection.total_count
@@ -152,10 +156,21 @@ module RocketPants
       elsif Respondable.collection?(object)
         collection object, options
       else
-        resource object, options
+        if Respondable.invalid?(object)
+          error! :invalid_resource, object.errors
+        else
+          resource object, options
+        end
       end
     end
     alias expose exposes
+
+    # Fixes head to return the correct content type for you api.
+    #
+    # See the ActionController build in version for definitions.
+    def head(status, options = {})
+      super status, options.merge(content_type: 'application/json')
+    end
 
     # Hooks in to allow you to perform pre-processing of objects
     # when they are exposed. Used for plugins to the controller.

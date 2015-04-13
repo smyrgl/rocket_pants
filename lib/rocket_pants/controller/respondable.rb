@@ -41,22 +41,22 @@ module RocketPants
       case pagination_type(collection)
       when :will_paginate
         {
-          previous: collection.previous_page.try(:to_i),
-          next:     collection.next_page.try(:to_i),
-          current:  collection.current_page.try(:to_i),
-          per_page: collection.per_page.try(:to_i),
-          count:    collection.total_entries.try(:to_i),
-          pages:    collection.total_pages.try(:to_i)
+          :previous => collection.previous_page.try(:to_i),
+          :next     => collection.next_page.try(:to_i),
+          :current  => collection.current_page.try(:to_i),
+          :per_page => collection.per_page.try(:to_i),
+          :count    => collection.total_entries.try(:to_i),
+          :pages    => collection.total_pages.try(:to_i)
         }
       when :kaminari
         current, total, per_page = collection.current_page, collection.num_pages, collection.limit_value
         {
-          current:  current,
-          previous: (current > 1 ? (current - 1) : nil),
-          next:     (current => total ? nil : (current + 1)),
-          per_page: per_page,
-          pages:    total,
-          count:    collection.total_count
+          :current  => current,
+          :previous => (current > 1 ? (current - 1) : nil),
+          :next     => (current >= total ? nil : (current + 1)),
+          :per_page => per_page,
+          :pages    => total,
+          :count    => collection.total_count
         }
       end
     end
